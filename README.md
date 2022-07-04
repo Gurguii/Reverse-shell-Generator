@@ -1,5 +1,6 @@
 # Reverse-shell-Generator
-Generates a reverse shell, allows URL encoding and copies the shell in your clipboard. 
+Generates a reverse shell, allows URL encoding and copies the shell in your clipboard.  
+You can remove the .py and add the file to somewhere in your PATH so you can use it from anywhere whenever you need a revshell.
 ## Quick usage
 
 #### Clone the repository (or just copy-paste)
