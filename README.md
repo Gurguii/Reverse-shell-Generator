@@ -3,6 +3,10 @@ Pyperclip
 ```bash
   pip3 install pyperclip
 ```
+Psutil
+```bash
+  pip3 install psutil
+```
 ## Quick usage
 
 #### Clone the repository (or just copy-paste)
@@ -11,7 +15,7 @@ Pyperclip
 ```
 #### Run the script
 ```bash
-    python3 reverse.py -sh <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type>
+    python3 reverse.py -s <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type>
 ```  
 **Note:** default LPORT is 4444, params with * are optional.  
 **Available revshells:** bash, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
