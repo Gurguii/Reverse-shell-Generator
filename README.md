@@ -18,7 +18,7 @@ Psutil
     python3 reverse.py -s <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type>
 ```  
 **Note:** default LPORT is 4444, params with * are optional.  
-**Available revshells:** bash, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
+**Available revshells:** bash, sh, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
 **Available encodes**: base64(also accepts b64 as input), url  
 ### Useful info  
 **LHOST CAN BE AN IP OR AN INTERFACE(E.g. tun0 or 10.10.10.10)**
