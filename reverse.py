@@ -197,7 +197,7 @@ if not args.lhost:
 try:
     lhost = net_if_addrs()[args.lhost][0].address
 except:
-    if match("^[a-z]+",args.lhost):
+    if match("^[a-z]+",args.lhost) and args.lhost != "localhost":
         print(f"[!]Interface {args.lhost} doesn't exist")
         exit(0)
     lhost = args.lhost
