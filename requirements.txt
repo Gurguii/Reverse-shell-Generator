@@ -1,0 +1,4 @@
+# Requirements for reverse shell generator
+
+psutil==5.9.1 # Allows using interfaces' names in lhost
+pyperclip==1.8.2 # Allows copying rshell to clipboard

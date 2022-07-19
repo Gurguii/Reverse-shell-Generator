@@ -12,23 +12,29 @@ Psutil
 #### Clone the repository (or just copy-paste)
 ```bash
   sudo git clone https://github.com/Gurguii/Reverse-shell-Generator
+```  
+```bash
+    cd Reverse-shell-Generator
 ```
 #### Run the script
 ```bash
-    python3 reverse.py -s <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type>
+    python3 reverse.py -s <revshell_type> -lh <lhost> -lp* <lport> -enc* <encode_type> -list* <shell_type> --listall*
 ```  
-**Note:** default LPORT is 4444, params with * are optional.  
-**Available revshells:** bash, sh, netcat, ncat, rustcat, perl, php, windows, powershell, python, ruby, socat, nodejs, telnet, zsh, lua, golang, awk.  
+**Note:** default LPORT is 4444, params with * are optional.    
 **Available encodes**: base64(also accepts b64 as input), url  
 ### Useful info  
-**LHOST CAN BE AN IP OR AN INTERFACE(E.g. tun0 or 10.10.10.10)**
+**LHOST CAN BE AN IP OR AN INTERFACE OR LOCALHOST(E.g. tun0 or 10.10.10.10)**
 - Get a list of all available reverse shells 
 ```bash
-    python3 reverse.py -s listall
+    python3 reverse.py -listall
 ```  
 - Get a list of reverse shells of a given type with the name
 ```bash
-    python3 reverse.py -s nc=list
+    python3 reverse.py -list bash
+``` 
+- Straight craft an specific rshell by name  
+```bash
+    python3 reverse.py -s bash=<name> -lh <lhost>
 ```
 Output:  
  ![image](https://user-images.githubusercontent.com/101645735/178015002-a7ec7467-8b62-4c14-9648-e0c0bf90e019.png)
