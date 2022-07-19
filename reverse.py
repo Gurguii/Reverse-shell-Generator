@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import argparse
 from base64 import b64encode
 from importlib.util import find_spec
@@ -7,7 +8,9 @@ from psutil import net_if_addrs
 from sys import argv
 from pyperclip import copy
 from re import match
+
 requirements = ("pyperclip","psutil")
+
 for library in requirements:
     if not find_spec(library):
         print(f"[!] Looks like you don't have {library} installed.\npip3 install {library}")
@@ -17,11 +20,12 @@ available_shells = '| BASH | SH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | P
 
 def usage():
     global available_shells
-    print("\n[!] Args with a '*' are optional")
-    print(f"Usage: python3 {argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type>\n\nAvailable shells:")
-    print(available_shells+"\n")
-    print("To list available revshells add =list")
-    print(f"E.g => python3 {argv[0]} --shell netcat=list\n")
+    print(f"\n{'':=<15}{''' Args with * are optional '''}{'':=>15}\n")
+    print(f"python3 {argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type> -list* <shell-type> -listall*")
+    print(f"\n{'':=<15}{'''     Available shells     '''}{'':=>15}\n\n{available_shells}\n")
+    print(f"{'':=<15}{'''     Available encodes    '''}{'':=>15}\n\n| URL | BASE64 |\n")
+    print(f"{'':=<15}{'''          Options         '''}{'':=>15}")
+    print("\n-lh / --lhost <lhost> - Listening host, Ip | localhost | interface\n-lp / --lport <lport> - Listening port, 4444 by default\n-s / --shell <shell-type> - Shell type\n-enc / --encode <enc-type> - Encode type\n-list / --list <shell-name> - List available options of given shell name\n-listall / --listall - List every shell type and option and exit\n-h / --help - Display this menu and exit")
 
 parser = argparse.ArgumentParser(usage=argparse.SUPPRESS,add_help=False)
 parser.add_argument('-lh','--lhost',metavar='')
