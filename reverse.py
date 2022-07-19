@@ -6,7 +6,7 @@ from urllib.parse import quote
 from psutil import net_if_addrs
 from sys import argv
 from pyperclip import copy
-
+from re import match
 requirements = ("pyperclip","psutil")
 for library in requirements:
     if not find_spec(library):
@@ -197,6 +197,9 @@ if not args.lhost:
 try:
     lhost = net_if_addrs()[args.lhost][0].address
 except:
+    if match("^[a-z]+",args.lhost):
+        print(f"[!]Interface {args.lhost} doesn't exist")
+        exit(0)
     lhost = args.lhost
 
 # Make shell lowercase to avoid case problems
@@ -207,7 +210,7 @@ if "netcat" in shell:
     shell = shell.replace("netcat","nc")
 subgroup = None
 
-# 
+# Split shell type and name
 if "=" in shell:
     subgroup = shell.split("=")[1]
     shell = shell.split("=")[0]
