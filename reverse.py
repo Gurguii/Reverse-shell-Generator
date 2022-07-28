@@ -205,7 +205,7 @@ if "=" in shell:
     try:
         shells[shell][subgroup]
     except:
-        print(f"[-]Name {subgroup} not found in {shell} shells")
+        print(f"[-] Name {subgroup} not found in {shell} shells")
         exit(0)
 
 # Shell must be available
@@ -227,15 +227,15 @@ except:
         exit(0)
     lhost = args.lhost
 
-# Make sure lport is a number at least
-try:
-    int(args.lport)
-except:
-    print(f"{args.lport} is not a valid port number")
-    exit(0)
-
 # Make lport user choice or 4444 by default
 lport = args.lport if args.lport else '4444'
+
+# Make sure lport is a number
+try:
+    int(lport)
+except:
+    print(f"{lport} is not a valid port number")
+    exit(0)
 
 # Make encode user choice or None by default
 encode = args.encode if args.encode else None
