@@ -1,11 +1,7 @@
-## Requirements
-Pyperclip
+## Install requirements  
+- Into Reverse-shell-Generator directory
 ```bash
-  pip3 install pyperclip
-```
-Psutil
-```bash
-  pip3 install psutil
+  pip3 install -r requirements.txt
 ```
 ## Quick usage
 
