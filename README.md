@@ -12,6 +12,11 @@ This python program aims to create reverse shell commands with a fast syntax whi
 #### Install requirements
 ```bash
     pip3 install -r requirements.txt
+```  
+#### Give execute permissions  
+**This is not required if you're going to execute the script like 'python3 reverse ..."**  
+```bash
+    chmod +x reverse
 ```
 ## Usage
 ```bash
